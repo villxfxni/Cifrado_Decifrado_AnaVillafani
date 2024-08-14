@@ -117,7 +117,7 @@
         function saveOutput() {
             const output = document.getElementById('outputText').value;
             const tipoCipher = document.getElementById('tipoCipher').value;
-            const filename = `avs_key_${tipoCipher.replace('bit', '')}`;
+            const filename = `cifrado_${tipoCipher.replace('bit', '')}`;
             saveToFile(output, filename);
         }
 
@@ -128,7 +128,7 @@
             for (let char in key) {
                 content += `${char}: ${key[char]}\n`;
             }
-            const filename = `ana_${tipoCipher.replace('bit', '')}`;
+            const filename = `key_${tipoCipher.replace('bit', '')}`;
             saveToFile(content, filename);
         }
 
