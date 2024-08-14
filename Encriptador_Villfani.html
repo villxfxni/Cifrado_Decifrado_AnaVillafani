@@ -1,0 +1,190 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cifrado y Descifrado - Ana Villafani</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Proyecto de Encriptacion y Decifrado</h1>
+        <h1>Ana Villafani</h1>
+        <div id="modeSelection" style="align-items: center; text-align: center;">
+            <button onclick="showEncryption()">Cifrado</button>
+            <button onclick="showDecryption()">Decifrado</button>
+        </div>
+        <div id="encryptionSection" class="hidden" style="max-width: 800px;">
+            <h2>Cifrado</h2>
+            <textarea id="inputText" placeholder="Ingresar mensaje o subir un archivo"></textarea>
+            <input type="file" id="fileInput" accept=".txt">
+            <select id="tipoCipher">
+                <option value="AVS">AVS Code</option>
+                <option value="2bit">2 Bits</option>
+                <option value="4bit">4 Bits</option>
+                <option value="8bit">8 Bits</option>
+                <option value="16bit">16 Bits</option>
+            </select>
+            <button onclick="leerInput()">Cifrar</button>
+            <h2>Salida</h2>
+            <textarea id="outputText" readonly></textarea>
+            <button onclick="saveOutput()">Guardar cifrado</button>
+            <button onclick="saveCifrado()">Guardar llave de cifrado</button>
+            <h2>Llave de Cifrado</h2>
+            <table id="encryptionTable"></table>
+        </div>
+        <div id="decryptionSection" class="hidden" style="width: 100%px;">
+            <h2>Descifrado</h2>
+            <h3>Key:</h3>
+            <input type="file" id="keyFileInput" accept=".txt">
+            <h3>Archivo:</h3>
+            <input type="file" id="textFileInput" accept=".txt"><br><br>
+            <button onclick="processDecryption()">Descifrar</button>
+            <h2>Salida</h2>
+            <textarea id="decryptedText" readonly></textarea>
+        </div>
+    </div>
+   <script>
+        const AVSCode = {
+            'a': '23', 'b': '26', 'c': '29', 'd': '12', 'e': '15',
+            'f': '18', 'g': '31', 'h': '34', 'i': '37', 'j': '79',
+            'k': '76', 'l': '73', 'm': '87', 'n': '54', 'o': '21',
+            'p': '56', 'q': '59', 'r': '53', 's': '48', 't': '45',
+            'u': '42', 'v': '79', 'w': '76', 'x': '93', 'y': '98',
+            'z': '99', '1': 'q', '2': 'w', '3': 'e', '4': 'r',
+            '5': 't', '6': 'y', '7': 'u', '8': 'i', '9': 'o', '0': 'p'
+        };
+
+        function generateBitEncryption(bits) {
+            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            const encryptionKey = {};
+            characters.split('').forEach((char, index) => {
+                encryptionKey[char] = index.toString(2).padStart(bits, '0');
+            });
+            return encryptionKey;
+        }
+
+        const encryptionKeys = {
+            'AVS': AVSCode,
+            '2bit': generateBitEncryption(2),
+            '4bit': generateBitEncryption(4),
+            '8bit': generateBitEncryption(8),
+            '16bit': generateBitEncryption(16)
+        };
+
+        function encrypt(text, tipoCipher) {
+            const key = encryptionKeys[tipoCipher];
+            return text.toLowerCase().split('').map(char => key[char] || char).join(' ');
+        }
+
+        function decrypt(text, key) {
+            const decryptionKey = Object.fromEntries(Object.entries(key).map(([k, v]) => [v, k]));
+            return text.split(' ').map(code => decryptionKey[code] || code).join('');
+        }
+
+        function leerInput() {
+            const input = document.getElementById('inputText').value;
+            const output = document.getElementById('outputText');
+            const tipoCipher = document.getElementById('tipoCipher').value;
+            output.value = encrypt(input, tipoCipher);
+            updateEncryptionTable(tipoCipher);
+        }
+
+        function updateEncryptionTable(tipoCipher) {
+            const table = document.getElementById('encryptionTable');
+            const key = encryptionKeys[tipoCipher];
+            
+            let html = '<tr><th>Caracter</th><th>Cifrado</th></tr>';
+            for (let char in key) {
+                html += `<tr><td>${char}</td><td>${key[char]}</td></tr>`;
+            }
+            table.innerHTML = html;
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('inputText').value = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        document.getElementById('tipoCipher').addEventListener('change', function() {
+            updateEncryptionTable(this.value);
+        });
+
+        function saveOutput() {
+            const output = document.getElementById('outputText').value;
+            const tipoCipher = document.getElementById('tipoCipher').value;
+            const filename = `avs_key_${tipoCipher.replace('bit', '')}`;
+            saveToFile(output, filename);
+        }
+
+        function saveCifrado() {
+            const tipoCipher = document.getElementById('tipoCipher').value;
+            const key = encryptionKeys[tipoCipher];
+            let content = '';
+            for (let char in key) {
+                content += `${char}: ${key[char]}\n`;
+            }
+            const filename = `ana_${tipoCipher.replace('bit', '')}`;
+            saveToFile(content, filename);
+        }
+
+        function saveToFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${filename}.txt`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function showEncryption() {
+            document.getElementById('encryptionSection').classList.remove('hidden');
+            document.getElementById('decryptionSection').classList.add('hidden');
+        }
+
+        function showDecryption() {
+            document.getElementById('encryptionSection').classList.add('hidden');
+            document.getElementById('decryptionSection').classList.remove('hidden');
+        }
+
+        function processDecryption() {
+            const keyFile = document.getElementById('keyFileInput').files[0];
+            const textFile = document.getElementById('textFileInput').files[0];
+
+            if (!keyFile || !textFile) {
+                alert('Ingrese los archivos en los campos correspondientes.');
+                return;
+            }
+
+            const keyReader = new FileReader();
+            keyReader.onload = function(e) {
+                const key = parseKey(e.target.result);
+                const textReader = new FileReader();
+                textReader.onload = function(e) {
+                    const encryptedText = e.target.result;
+                    const decryptedText = decrypt(encryptedText, key);
+                    document.getElementById('decryptedText').value = decryptedText;
+                };
+                textReader.readAsText(textFile);
+            };
+            keyReader.readAsText(keyFile);
+        }
+
+        function parseKey(keyContent) {
+            const key = {};
+            keyContent.split('\n').forEach(line => {
+                const [char, value] = line.split(':').map(s => s.trim());
+                if (char && value) {
+                    key[char] = value;
+                }
+            });
+            return key;
+        }
+        updateEncryptionTable('AVS');
+    </script>
+</body>
+</html>
