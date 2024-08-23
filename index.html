@@ -4,7 +4,13 @@
     <title>Cifrado y Descifrado - Ana Villafani</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body> 
+    <div style="flex-direction: row;" class="container">
+            <button id="originalThemeButton">Original Theme</button>
+            <button id="vibrantThemeButton">Vibrant Theme</button>
+            <button id="lightModeButton">Light Mode</button>
+            <button id="greenEtherealButton">Green Ethereal</button>
+    </div>
     <div class="container">
         <h1>Proyecto de Encriptacion y Decifrado</h1>
         <h1>Ana Villafani</h1>
@@ -16,7 +22,7 @@
             <h2>Cifrado</h2>
             <textarea id="inputText" placeholder="Ingresar mensaje o subir un archivo"></textarea>
             <input type="file" id="fileInput" accept=".txt">
-            <select id="tipoCipher">
+            <select id="tipoCipher" class="listita">
                 <option value="AVS">AVS Code</option>
                 <option value="2bit">2 Bits</option>
                 <option value="4bit">4 Bits</option>
@@ -117,7 +123,7 @@
         function saveOutput() {
             const output = document.getElementById('outputText').value;
             const tipoCipher = document.getElementById('tipoCipher').value;
-            const filename = `cifrado_${tipoCipher.replace('bit', '')}`;
+            const filename = `avs_key_${tipoCipher.replace('bit', '')}`;
             saveToFile(output, filename);
         }
 
@@ -128,7 +134,7 @@
             for (let char in key) {
                 content += `${char}: ${key[char]}\n`;
             }
-            const filename = `key_${tipoCipher.replace('bit', '')}`;
+            const filename = `ana_${tipoCipher.replace('bit', '')}`;
             saveToFile(content, filename);
         }
 
@@ -184,7 +190,24 @@
             });
             return key;
         }
+        document.getElementById('originalThemeButton').addEventListener('click', function() {
+    document.body.className = '';
+    });
+
+    document.getElementById('vibrantThemeButton').addEventListener('click', function() {
+        document.body.className = 'vibrant';
+    });
+
+    document.getElementById('lightModeButton').addEventListener('click', function() {
+        document.body.className = 'light-mode';
+    });
+
+    document.getElementById('greenEtherealButton').addEventListener('click', function() {
+        document.body.className = 'green-ethereal';
+    });
+
         updateEncryptionTable('AVS');
+       
     </script>
 </body>
 </html>
